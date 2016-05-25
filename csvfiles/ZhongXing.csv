@@ -1,0 +1,1 @@
+Name,Type,Signal,k,limit2,limit1,MatchStrategyId,MinMaxPositionChangePercent,XN,XD,IsNightTrade,IsDayTrade,OrderType,MatchType,Market,Action1,START1,END1,EmitterType,PreHardCloseSpread,GTNBWaitTime,GTNBTolerance,HCslip,Instruments_InstrumentName1,Instruments_IsConnect1,Instruments_Market1,Portfolio,Enabled

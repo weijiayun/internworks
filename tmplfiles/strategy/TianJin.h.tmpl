@@ -1,0 +1,39 @@
+struct OrderByVolume(required:OrderByVolume)
+{
+    required sint32 Volume;
+    required string Type;
+};
+
+struct OrderByNominal(required:OrderByNominal)
+{
+    required double Nominal;
+    required string Type;
+};
+
+struct TianJin(Strategy:strategy)
+{
+    required string Name;
+    required sint32 XN;
+    required sint32 XD;
+    required list<OrderByNominal> OrderBookByNominal;
+    required list<OrderByVolume> OrderBookByVolume;
+    required string StartTime;
+    required string Type equal TianJin;
+    required double MinMaxPositionChangePercent;
+    optional bool IsDayTrade default true;
+    optional OrderType::type OrderType default OTGFD;
+    optional string MatchType default "";
+    optional string Market reference market default "";
+    optional list<StrategyTradingRange> Ranges;
+    required string EmitterType reference IInstructionEmitter;
+    optional sint32 PreHardCloseSpread default 0;
+    optional sint32 GTNBWaitTime default 1000;
+    optional sint32 GTNBTolerance default 0;
+    optional sint32 HCslip default 5;
+    required list<FeederWithMarket> Instruments;
+    required uint32 Portfolio reference Portfolio;
+    optional bool Enabled default 1;
+    optional string Description default "";
+    required uint32 Id;
+
+};

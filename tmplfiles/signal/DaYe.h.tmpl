@@ -1,0 +1,14 @@
+struct DaYe(Signal:signal)
+{
+    required int CloseDay;
+    required int DependentSignalId;
+    required int Interval;
+    required string ClosePosTime;
+    required string OpenPosTime;
+    required string Type equal DaYe;
+    required bool NeedSigalDataFromAthene;
+    optional SignalMode::type Mode default Autonomy;
+    required uint32 Id;
+    required string Name;
+};
+

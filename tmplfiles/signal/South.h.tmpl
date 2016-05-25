@@ -1,0 +1,15 @@
+struct South(Signal:MapValueSignal)
+{
+    required list<string> South equal $GetSouth($BalanceDate,$$9,$$909);
+    required list<string> South1 equal $GetSouth1($BalanceDate,$$9,$$909);
+
+
+    required signal BalanceDateSignal;
+    required string BalanceDate;
+    required string Type equal South;
+    required bool NeedSigalDataFromAthene;
+    optional SignalMode::type Mode default Autonomy;
+    required uint32 Id;
+    required string Name;
+};
+

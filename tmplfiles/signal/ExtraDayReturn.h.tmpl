@@ -1,0 +1,11 @@
+struct ExtraDayReturn(Signal:SingleValueSignal)
+{
+    required string Type equal ExtraDayReturn;
+    required string InstrumentName reference Instrument;
+    optional bool Enabled default 1;
+    required bool NeedSigalDataFromAthene;
+    optional SignalMode::type Mode default Autonomy;
+    required uint32 Id;
+    required string Name;
+};
+
