@@ -108,14 +108,43 @@ def findAllList(Path):
         else:
             TotalList.append(dict(option=e[0],type=e[1],varname=e[2],Reference="",Default=""))
             continue
-
     if TotalList==[]:
         StructureNameNotMatchError(name)
-
-
-
     return [name,TotalList,method]
 
+def dollarFuncCheck(memberlist,initVars,typeList):
+    funcDict={memberlist[i]:e for i,e in enumerate(initVars) if '$'in e}
+    def redelete():
+        for i,e in enumerate(initVars):
+            if '$' in e:
+                del memberlist[i]
+                del initVars[i]
+                del typeList[i]
+                return redelete()
+    redelete()
+    dollarCheckResultsDict = {}
+    for key,value in funcDict.items():
+        if '$$' in value:
+            dollarsplit = value.split('$$')
+            twoDollarList= [0 for c in dollarsplit[1:]]
+            dollar1split=dollarsplit[0]
+            dollarsplit=  dollar1split.split('$')
+            funcName = value.split('$')[1][:-1]
+            if dollarsplit[2:][0]=='None,':
+                oneDollarList=[0 for c in dollarsplit[2:]]
+            else:
+                oneDollarList = [1 for c in dollarsplit[2:]]
+            oneDollarList[len(oneDollarList):len(oneDollarList)]=twoDollarList
+            extendElems=oneDollarList
+        else:
+            dollarsplit = value.split('$')
+            funcName = value.split('$')[1][:-1]
+            if dollarsplit[2:][0]=='None)':
+                extendElems = [0 for c in dollarsplit[2:]]
+            else:
+                extendElems = [1 for c in dollarsplit[2:]]
+        dollarCheckResultsDict[key]=[funcName,extendElems]
+    return dollarCheckResultsDict
 
 #################################################################################################
 
@@ -157,51 +186,18 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
         del TypeList[NameIndex+1]
         initVar.insert(0,initVar[NameIndex])
         del initVar[NameIndex+1]
-    param=""
-    oneDollarparam = ""
-    if name in Memberlist:
-        NameIndex=Memberlist.index(name)
-        if '$$' in initVar[NameIndex]:
-            dollarsplit = initVar[NameIndex].split('$$')
-            twoDollarList= [c[:-1] for c in dollarsplit[1:]]
-            twoDollarparam=""
-            for i,e in enumerate(twoDollarList):
-                if i==len(twoDollarList)-1:
-                    twoDollarparam = twoDollarparam + e
-                else:
-                    twoDollarparam = twoDollarparam + e + ','
-            dollar1split=dollarsplit[0]
-            dollarsplit=  dollar1split.split('$')
-            fucName = initVar[NameIndex].split('$')[1][:-1]
-            if "None," == dollarsplit[2:][0] or 'none,'==dollarsplit[2:][0]:
-                oneDollarparam = 'None,'
-            else:
-                oneDollarList = ["{0}Meta.{1}".format(name,c[:-1]) for c in dollarsplit[2:]]
-                for i,e in enumerate(oneDollarList):
-                    oneDollarparam = oneDollarparam + e+','
-            param = '{0}({1}{2})'.format(fucName, oneDollarparam, twoDollarparam)
+    csvRequire="$South1(BalanceDate,9)"
+    signalfuncdict=dollarFuncCheck(Memberlist,initVar,TypeList)
+    a=re.split(r'[\(\)]+',csvRequire.strip())
+    csvFuncname=a[0][1:]
+    csvParams=re.split(r',',a[1])
 
-        else:
-            dollarsplit = initVar[NameIndex].split('$')
-            fucName = initVar[NameIndex].split('$')[1][:-1]
-            if "None)"== dollarsplit[2:][0] or "none)"==dollarsplit[2:][0]:
-                oneDollarparam='None'
-            else:
-                oneDollarList = ["{0}Meta.{1}".format(name,c[:-1]) for c in dollarsplit[2:]]
-                for i,e in enumerate(oneDollarList):
-                    if i==len(oneDollarList)-1:
-                        oneDollarparam=oneDollarparam+e
-                    else:
-                        oneDollarparam = oneDollarparam + e +','
-            param = '{0}({1})'.format(fucName, oneDollarparam)
-
-        del Memberlist[NameIndex]
-        del TypeList[NameIndex]
-        del initVar[NameIndex]
+    FuncDict={key:value[1] for key,value in signalfuncdict.items()}
 
     waitForMemberlist=copy.deepcopy(Memberlist)
 
 ####################job to expand types########################
+
 
     expandtype=['list<OrderByNominal>','list<OrderByVolume>']
     nameSuffix1=[['Nominal','Type'],['Volume','Type']]
@@ -257,6 +253,11 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
     f2.write('\n\040\040\040\040\040\040\040\040signal_list={}'.format(signalvarslist))
     f2.write('\n\040\040\040\040\040\040\040\040return signal_list')
 
+    f2.write('\n\n\040\040\040\040def get_function_dict(self):')
+    f2.write('\n\040\040\040\040\040\040\040\040function_dict={}'.format(FuncDict))
+    f2.write('\n\040\040\040\040\040\040\040\040return function_dict')
+
+
     f2.write('\n\n\040\040\040\040def get_bool_list(self):')
     f2.write('\n\040\040\040\040\040\040\040\040bool_list={0}'.format(boolList))
     f2.write('\n\040\040\040\040\040\040\040\040return bool_list')
@@ -287,8 +288,30 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
     f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040raise CSVConverterError({0}Meta.Name, {0}Meta.Type, "Can't find signal: {1}'''.format(name,'''{0}".format(member_value))'''))
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040else:')
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040data_json[member] = getattr({0}Meta, member)'.format(name))
-    if param != "":
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040data_json['{0}']=reference_arg_manager("{1}")'''.format(name,param))
+    if csvFuncname in FuncDict:
+        for i,e in enumerate(FuncDict[csvFuncname]):
+            print e
+            if e==1:
+                csvParams[i]='{0}Meta.'.format(name)+csvParams[i]
+        print csvParams
+        temp=""
+        for i,e in enumerate(csvParams):
+            if i==len(csvParams)-1:
+                temp+=e
+            else:
+                temp += e+","
+        param='{0}Meta.{1}({2})'.format(name,signalfuncdict[csvFuncname][0],temp)
+        print param
+        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040data_json['{0}']=reference_arg_manager("{1}")'''.format(csvFuncname,param))
+    else:
+        temp=""
+        for i,e in enumerate(csvParams):
+            if i==len(csvParams)-1:
+                temp+=e
+            else:
+                temp += e+","
+        param = '{0}({1})'.format(csvFuncname,temp)
+        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040data_json['{0}']=reference_arg_manager("{1}")'''.format(csvFuncname, param))
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040if not is_error:')
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040signal_object = SignalObject()')
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040signal_object.name = {0}Meta.Name'.format(name))
@@ -511,9 +534,9 @@ def GeneratePythonScripts(templateFileOrdirPath,generatePyPath,CsvPath,strategyM
 
 
 if __name__=='__main__':
-    filePath='/nethome/jiayun.wei/PycharmProjects/internday2/tmplfiles/'
-    PythonPath='converterPyFiles'
-    csvPath='csvfiles'
+    filePath='./tmplfiles/'
+    PythonPath='./converterPyFiles'
+    csvPath='./csvfiles'
     strategyMethod=['Automaton','SizeStrategy']
     try:
         GeneratePythonScripts(filePath,PythonPath,csvPath,strategyMethod)
