@@ -1,4 +1,4 @@
-import json
+import json,re
 from MiniMOManager.common.Util import is_bool,OrderedObject
 from MiniMOManager.common.SignalManager import SignalObject, SignalFinder
 from MiniMOManager.common.Util import get_max_id, is_bool, is_instrument_name, OrderedObject, CSVConverterError, get_strategy_id_by_name
@@ -9,14 +9,15 @@ class SouthMeta(OrderedObject):
         super(SouthMeta,self).__init__()
         self.Name=""
         self.Type="South"
+        self.South=""
         self.BalanceDateSignal=""
         self.BalanceDate=""
         self.NeedSigalDataFromAthene=""
         self.Mode="Autonomy"
 
     def get_const_member_list(self):
-        member_list = ['Name','Type','BalanceDateSignal','BalanceDate',
-            'NeedSigalDataFromAthene','Mode']
+        member_list = ['Name','Type','South','BalanceDateSignal',
+            'BalanceDate','NeedSigalDataFromAthene','Mode']
         return member_list
 
     def get_signal_list(self):
@@ -24,7 +25,7 @@ class SouthMeta(OrderedObject):
         return signal_list
 
     def get_function_dict(self):
-        function_dict={'South': [1, 0]}
+        function_dict={'South': ['GetSouth', [1, 0]]}
         return function_dict
 
     def get_bool_list(self):
@@ -57,10 +58,23 @@ class SouthConverter(object):
                 elif member in SouthMeta.get_signal_list():
                     data_json[member] = (signal_finder.get_signal_id_by_name(member_value), member_value)[isinstance(member_value, int)]
                     if data_json[member] == -1:
-                        raise CSVConverterError(SouthMeta.Name, SouthMeta.Type, "Can't find signal: {0}".format(member_value))
+                        is_error=True
                 else:
                     data_json[member] = getattr(SouthMeta, member)
-            data_json['South1']=reference_arg_manager("South1(BalanceDate,9)")
+            for key,value in SouthMeta.get_function_dict():
+                param = re.split(r'[\(\)]+',data_json[key].strip())
+                param = re.split(r',',param[1].strip())
+                for i,e in enumerate(value[1]):
+                    if e == 1:
+                        param[i] = "SouthMeta."+param[i]
+                temp = ""
+                for i,e in enumerate(param):
+                    if i == len(param)-1:
+                        temp += e
+                    else:
+                        temp += e + ","
+                FuncAndName = "${}({})".format(value[0],temp)
+                data_json["{}".format(value[0])] = reference_arg_manager("{}".format(FuncAndName))
             if not is_error:
                 signal_object = SignalObject()
                 signal_object.name = SouthMeta.Name

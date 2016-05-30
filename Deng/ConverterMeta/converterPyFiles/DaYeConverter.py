@@ -1,4 +1,4 @@
-import json
+import json,re
 from MiniMOManager.common.Util import is_bool,OrderedObject
 from MiniMOManager.common.SignalManager import SignalObject, SignalFinder
 from MiniMOManager.common.Util import get_max_id, is_bool, is_instrument_name, OrderedObject, CSVConverterError, get_strategy_id_by_name
@@ -26,10 +26,6 @@ class DaYeMeta(OrderedObject):
     def get_signal_list(self):
         signal_list=[]
         return signal_list
-
-    def get_function_dict(self):
-        function_dict={}
-        return function_dict
 
     def get_bool_list(self):
         bool_list=['NeedSigalDataFromAthene']
@@ -61,10 +57,9 @@ class DaYeConverter(object):
                 elif member in DaYeMeta.get_signal_list():
                     data_json[member] = (signal_finder.get_signal_id_by_name(member_value), member_value)[isinstance(member_value, int)]
                     if data_json[member] == -1:
-                        raise CSVConverterError(DaYeMeta.Name, DaYeMeta.Type, "Can't find signal: {0}".format(member_value))
+                        is_error=True
                 else:
                     data_json[member] = getattr(DaYeMeta, member)
-            data_json['South1']=reference_arg_manager("South1(BalanceDate,9)")
             if not is_error:
                 signal_object = SignalObject()
                 signal_object.name = DaYeMeta.Name

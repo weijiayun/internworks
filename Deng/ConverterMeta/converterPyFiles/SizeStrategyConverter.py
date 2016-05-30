@@ -126,10 +126,12 @@ class SizeStrategyConverter(object):
                     data_json[member] = is_bool(member_value)
                 elif member in SizeStrategyMeta.get_MatchStrategyId():
                     data_json[member] = (get_strategy_id_by_name(self.work_dir, member_value), member_value)[isinstance(member_value, int)]
+                    if data_json[member] == -1:
+                        raise CSVConverterError(SizeStrategyMeta.Name, SizeStrategyMeta.Type, "Can't find matchstrategy:{0}".format(member_value))
                 else:
                     data_json[member] = member_value
-            data_json['Instruments'] = generate_instruments(SizeStrategyMeta, SizeStrategyMeta.get_const_member_list)
-            data_json['Ranges'] = generate_ranges(SizeStrategyMeta, SizeStrategyMeta.get_const_member_list)
+            data_json['Instruments'] = generate_instruments(SizeStrategyMeta, SizeStrategyMeta.member_list)
+            data_json['Ranges'] = generate_ranges(SizeStrategyMeta, SizeStrategyMeta.member_list)
         except Exception as e:
             raise CSVConverterError(SizeStrategyMeta.Name, SizeStrategyMeta.Type, e.message)
         if self.work_dir is not None:

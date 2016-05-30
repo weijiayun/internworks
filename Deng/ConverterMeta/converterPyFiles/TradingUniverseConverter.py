@@ -1,4 +1,4 @@
-import json
+import json,re
 from MiniMOManager.common.Util import is_bool,OrderedObject
 from MiniMOManager.common.SignalManager import SignalObject, SignalFinder
 from MiniMOManager.common.Util import get_max_id, is_bool, is_instrument_name, OrderedObject, CSVConverterError, get_strategy_id_by_name
@@ -10,13 +10,14 @@ class TradingUniverseMeta(OrderedObject):
         self.Name=""
         self.Type="TradingUniverse"
         self.BalanceDateSignal=""
+        self.TradingUniverse=""
         self.Enabled=1
         self.NeedSigalDataFromAthene=""
         self.Mode="Autonomy"
 
     def get_const_member_list(self):
-        member_list = ['Name','Type','BalanceDateSignal','Enabled',
-            'NeedSigalDataFromAthene','Mode']
+        member_list = ['Name','Type','BalanceDateSignal','TradingUniverse',
+            'Enabled','NeedSigalDataFromAthene','Mode']
         return member_list
 
     def get_signal_list(self):
@@ -24,7 +25,7 @@ class TradingUniverseMeta(OrderedObject):
         return signal_list
 
     def get_function_dict(self):
-        function_dict={'TradingUniverse': [0]}
+        function_dict={'TradingUniverse': ['GetTradingUniverse', [0]]}
         return function_dict
 
     def get_bool_list(self):
@@ -57,10 +58,23 @@ class TradingUniverseConverter(object):
                 elif member in TradingUniverseMeta.get_signal_list():
                     data_json[member] = (signal_finder.get_signal_id_by_name(member_value), member_value)[isinstance(member_value, int)]
                     if data_json[member] == -1:
-                        raise CSVConverterError(TradingUniverseMeta.Name, TradingUniverseMeta.Type, "Can't find signal: {0}".format(member_value))
+                        is_error=True
                 else:
                     data_json[member] = getattr(TradingUniverseMeta, member)
-            data_json['South1']=reference_arg_manager("South1(BalanceDate,9)")
+            for key,value in TradingUniverseMeta.get_function_dict():
+                param = re.split(r'[\(\)]+',data_json[key].strip())
+                param = re.split(r',',param[1].strip())
+                for i,e in enumerate(value[1]):
+                    if e == 1:
+                        param[i] = "TradingUniverseMeta."+param[i]
+                temp = ""
+                for i,e in enumerate(param):
+                    if i == len(param)-1:
+                        temp += e
+                    else:
+                        temp += e + ","
+                FuncAndName = "${}({})".format(value[0],temp)
+                data_json["{}".format(value[0])] = reference_arg_manager("{}".format(FuncAndName))
             if not is_error:
                 signal_object = SignalObject()
                 signal_object.name = TradingUniverseMeta.Name
