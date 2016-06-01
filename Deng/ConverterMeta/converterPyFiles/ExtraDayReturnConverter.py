@@ -7,12 +7,12 @@ from MiniMOManager.common.ConverterManager.Util import reference_portfolio, gene
 class ExtraDayReturnMeta(OrderedObject):
     def __init__(self):
         super(ExtraDayReturnMeta,self).__init__()
-        self.Name=""
-        self.Type="ExtraDayReturn"
-        self.InstrumentName=""
-        self.Enabled=1
-        self.NeedSigalDataFromAthene=""
-        self.Mode="Autonomy"
+        self.Name = ""
+        self.Type = "ExtraDayReturn"
+        self.InstrumentName = ""
+        self.Enabled = 1
+        self.NeedSigalDataFromAthene = ""
+        self.Mode = "Autonomy"
 
     def get_const_member_list(self):
         member_list = ['Name','Type','InstrumentName','Enabled',
@@ -20,11 +20,19 @@ class ExtraDayReturnMeta(OrderedObject):
         return member_list
 
     def get_signal_list(self):
-        signal_list=[]
+        signal_list = []
         return signal_list
 
+    def required_member_list(self):
+        required_list=['Name', 'Type', 'InstrumentName', 'NeedSigalDataFromAthene']
+        return required_list
+
+    def optional_member_list(self):
+        optional_list=['Enabled', 'Mode']
+        return optional_list
+
     def get_bool_list(self):
-        bool_list=['Enabled', 'NeedSigalDataFromAthene']
+        bool_list = ['Enabled', 'NeedSigalDataFromAthene']
         return bool_list
 
 class ExtraDayReturnConverter(object):

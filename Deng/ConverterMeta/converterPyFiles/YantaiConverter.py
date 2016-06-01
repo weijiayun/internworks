@@ -9,35 +9,35 @@ from MiniMOManager.common.ConverterManager.Util import reference_portfolio, gene
 class YantaiMeta(OrderedObject):
     def __init__(self):
         super(YantaiMeta,self).__init__()
-        self.Name=""
-        self.Type="Yantai"
-        self.ActionTime=""
-        self.DependentSignalId=""
-        self.SingleAmt=""
-        self.AVolumeLimit=""
-        self.SellPos=""
-        self.HoldPos=""
-        self.MinMaxPositionChangePercent=""
-        self.XN=""
-        self.XD=""
-        self.IsNightTrade=True
-        self.IsDayTrade=True
-        self.OrderType="OTGFD"
-        self.MatchType=""
-        self.Market=""
-        self.Action1=""
-        self.START1=""
-        self.END1=""
-        self.EmitterType=""
-        self.PreHardCloseSpread=0
-        self.GTNBWaitTime=1000
-        self.GTNBTolerance=0
-        self.HCslip=5
-        self.Instruments_InstrumentName1=""
-        self.Instruments_IsConnect1=""
-        self.Instruments_Market1=""
-        self.Portfolio=""
-        self.Enabled=1
+        self.Name = ""
+        self.Type = "Yantai"
+        self.ActionTime = ""
+        self.DependentSignalId = ""
+        self.SingleAmt = ""
+        self.AVolumeLimit = ""
+        self.SellPos = ""
+        self.HoldPos = ""
+        self.MinMaxPositionChangePercent = ""
+        self.XN = ""
+        self.XD = ""
+        self.IsNightTrade = True
+        self.IsDayTrade = True
+        self.OrderType = "OTGFD"
+        self.MatchType = ""
+        self.Market = ""
+        self.Action1 = ""
+        self.START1 = ""
+        self.END1 = ""
+        self.EmitterType = ""
+        self.PreHardCloseSpread = 0
+        self.GTNBWaitTime = 1000
+        self.GTNBTolerance = 0
+        self.HCslip = 5
+        self.Instruments_InstrumentName1 = ""
+        self.Instruments_IsConnect1 = ""
+        self.Instruments_Market1 = ""
+        self.Portfolio = ""
+        self.Enabled = 1
 
     def get_const_member_list(self):
         member_list = ['Name','Type','ActionTime','DependentSignalId',
@@ -51,8 +51,20 @@ class YantaiMeta(OrderedObject):
         return member_list
 
     def get_signal_list(self):
-        signal_list = ['signal']
+        signal_list = []
         return signal_list
+
+    def required_member_list(self):
+        required_list=['Name', 'Type', 'ActionTime', 'DependentSignalId', 'SingleAmt', 'AVolumeLimit', 'SellPos', 'HoldPos', 'MinMaxPositionChangePercent', 'XN', 'XD', 'EmitterType', 'Instruments_InstrumentName1', 'Instruments_IsConnect1', 'Instruments_Market1', 'Portfolio']
+        return required_list
+
+    def optional_member_list(self):
+        optional_list=['IsNightTrade', 'IsDayTrade', 'OrderType', 'MatchType', 'Market', 'Action1', 'START1', 'END1', 'PreHardCloseSpread', 'GTNBWaitTime', 'GTNBTolerance', 'HCslip', 'Enabled']
+        return optional_list
+
+    def get_bool_list(self):
+        bool_list = ['IsNightTrade', 'IsDayTrade', 'Enabled']
+        return bool_list
 
     def get_strategy_csv_header(self):
         header_list = []
@@ -66,11 +78,11 @@ class YantaiMeta(OrderedObject):
         return portfolio_list
 
     def get_bool_list(self):
-        bool_list=['IsNightTrade', 'IsDayTrade', 'Enabled']
+        bool_list = ['IsNightTrade', 'IsDayTrade', 'Enabled']
         return bool_list
 
     def get_MatchStrategyId(self):
-        ID_list=['MatchStrategyId']
+        ID_list = ['MatchStrategyId']
         return ID_list
 
 class YantaiConverter(object):

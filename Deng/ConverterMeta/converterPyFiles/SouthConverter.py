@@ -7,13 +7,13 @@ from MiniMOManager.common.ConverterManager.Util import reference_portfolio, gene
 class SouthMeta(OrderedObject):
     def __init__(self):
         super(SouthMeta,self).__init__()
-        self.Name=""
-        self.Type="South"
-        self.South=""
-        self.BalanceDateSignal=""
-        self.BalanceDate=""
-        self.NeedSigalDataFromAthene=""
-        self.Mode="Autonomy"
+        self.Name = ""
+        self.Type = "South"
+        self.South = ""
+        self.BalanceDateSignal = ""
+        self.BalanceDate = ""
+        self.NeedSigalDataFromAthene = ""
+        self.Mode = "Autonomy"
 
     def get_const_member_list(self):
         member_list = ['Name','Type','South','BalanceDateSignal',
@@ -21,15 +21,19 @@ class SouthMeta(OrderedObject):
         return member_list
 
     def get_signal_list(self):
-        signal_list=['BalanceDateSignal']
+        signal_list = ['BalanceDateSignal']
         return signal_list
 
-    def get_function_dict(self):
-        function_dict={'South': ['GetSouth', [1, 0]]}
-        return function_dict
+    def required_member_list(self):
+        required_list=['Name', 'Type', 'South', 'BalanceDateSignal', 'BalanceDate', 'NeedSigalDataFromAthene']
+        return required_list
+
+    def optional_member_list(self):
+        optional_list=['Mode']
+        return optional_list
 
     def get_bool_list(self):
-        bool_list=['NeedSigalDataFromAthene']
+        bool_list = ['NeedSigalDataFromAthene']
         return bool_list
 
 class SouthConverter(object):
@@ -61,30 +65,7 @@ class SouthConverter(object):
                         is_error=True
                 else:
                     data_json[member] = getattr(SouthMeta, member)
-            for key,value in SouthMeta.get_function_dict():
-                param = re.split(r'[\(\)]+',data_json[key].strip())
-                param = re.split(r',',param[1].strip())
-                for i,e in enumerate(value[1]):
-                    if e == 1:
-                        param[i] = "SouthMeta."+param[i]
-                temp = ""
-                for i,e in enumerate(param):
-                    if i == len(param)-1:
-                        temp += e
-                    else:
-                        temp += e + ","
-                FuncAndName = "${}({})".format(value[0],temp)
-                data_json["{}".format(value[0])] = reference_arg_manager("{}".format(FuncAndName))
-            if not is_error:
-                signal_object = SignalObject()
-                signal_object.name = SouthMeta.Name
-                signal_object.type = SouthMeta.Type
-                signal_object.enable = True
-                signal_object.node = json.dumps(data_json)
-                self.__signal_object_list.append(signal_object)
-        except Exception as e:
-            raise CSVConverterError(SouthMeta.Name, SouthMeta.Type, e.message)
-
-    def get_signal_id(self, signal_id):
-        signal_id_list = [signal_id]
-        return signal_id_list
+            param = data_json["South"].strip().split('$')
+            param = param[1].split(',')
+            param[0] = param[0][1:]
+            param[-1] = param[-1][:-1]

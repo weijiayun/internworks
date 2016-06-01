@@ -9,14 +9,14 @@ from MiniMOManager.common.ConverterManager.Util import reference_portfolio, gene
 class AutomatonMeta(OrderedObject):
     def __init__(self):
         super(AutomatonMeta,self).__init__()
-        self.Name=""
-        self.Type="Automaton"
-        self.SplitTyoExchange=""
-        self.MaxOrderQty=""
-        self.CloseYdPriorityQue=""
-        self.SplitType="ShyGirl"
-        self.Strategies=""
-        self.Components=""
+        self.Name = ""
+        self.Type = "Automaton"
+        self.SplitTyoExchange = ""
+        self.MaxOrderQty = ""
+        self.CloseYdPriorityQue = ""
+        self.SplitType = "ShyGirl"
+        self.Strategies = ""
+        self.Components = ""
 
     def get_const_member_list(self):
         member_list = ['Name','Type','SplitTyoExchange','MaxOrderQty',
@@ -25,8 +25,20 @@ class AutomatonMeta(OrderedObject):
         return member_list
 
     def get_signal_list(self):
-        signal_list = ['signal']
+        signal_list = []
         return signal_list
+
+    def required_member_list(self):
+        required_list=['Name', 'Type', 'SplitTyoExchange', 'MaxOrderQty', 'CloseYdPriorityQue', 'SplitType', 'Strategies', 'Components']
+        return required_list
+
+    def optional_member_list(self):
+        optional_list=[]
+        return optional_list
+
+    def get_bool_list(self):
+        bool_list = []
+        return bool_list
 
     def get_strategy_csv_header(self):
         header_list = []
@@ -40,11 +52,11 @@ class AutomatonMeta(OrderedObject):
         return portfolio_list
 
     def get_bool_list(self):
-        bool_list=[]
+        bool_list = []
         return bool_list
 
     def get_MatchStrategyId(self):
-        ID_list=['MatchStrategyId']
+        ID_list = ['MatchStrategyId']
         return ID_list
 
 class AutomatonConverter(object):

@@ -27,15 +27,17 @@ def outfilecsv(memeblist,name,path):
             f.write("{},".format(m))
     f.close()
 
-def TypeExpand(typeList,memberList,initvars,typename,ElemNameSuffix,expandNum=1):
+def TypeExpand(optionList,typeList,memberList,initvars,typename,ElemNameSuffix,expandNum=1):
         for typeElem in typename:
             if typeElem in typeList:
                 typeIndex=typeList.index(typeElem)
                 tempmemberName=memberList[typeIndex]
                 initvalue=initvars[typeIndex]
+                option=optionList[typeIndex]
                 del memberList[typeIndex]
                 del typeList[typeIndex]
                 del initvars[typeIndex]
+                del optionList[typeIndex]
                 ElemNameSuffix.reverse()
                 for nameSuffix in ElemNameSuffix:
                     if nameSuffix[0] in typeElem:
@@ -44,15 +46,18 @@ def TypeExpand(typeList,memberList,initvars,typename,ElemNameSuffix,expandNum=1)
                                 memberList.insert(typeIndex,tempmemberName+'_'+s+str(i))
                                 typeList.insert(typeIndex,typeElem)
                                 initvars.insert(typeIndex,initvalue)
+                                optionList.insert(typeIndex,option)
 
-def kwExpand(typeList,memberList,initvars,ElemNameSuffix,keyword,expandNum=1,iskeywords=True):
+def kwExpand(optionList,typeList,memberList,initvars,ElemNameSuffix,keyword,expandNum=1,iskeywords=True):
     if keyword in memberList:
         typeIndex=memberList.index(keyword)
         tempTypeName=typeList[typeIndex]
         initvalues=initvars[typeIndex]
+        option=optionList[typeIndex]
         del memberList[typeIndex]
         del typeList[typeIndex]
         del initvars[typeIndex]
+        del optionList[typeIndex]
         ElemNameSuffix.reverse()
         for i in range(expandNum,0,-1):
             for s in ElemNameSuffix:
@@ -62,6 +67,7 @@ def kwExpand(typeList,memberList,initvars,ElemNameSuffix,keyword,expandNum=1,isk
                     memberList.insert(typeIndex,s+str(i))
                 typeList.insert(typeIndex,tempTypeName)
                 initvars.insert(typeIndex,initvalues)
+                optionList.insert(typeIndex,option)
 
 def findAllList(Path):
     f=open(Path)
@@ -121,7 +127,7 @@ def dollarFuncCheck(memberlist,initVars):
     for key,value in funcDict.items():
         if '$$' in value:
             dollarsplit = value.split('$$')
-            twoDollarList= [0 for c in dollarsplit[1:]]
+            twoDollardigitList= [0 for c in dollarsplit[1:]]
             dollar1split=dollarsplit[0]
             dollarsplit=  dollar1split.split('$')
             funcName = value.split('$')[1][:-1]
@@ -129,7 +135,8 @@ def dollarFuncCheck(memberlist,initVars):
                 oneDollarList=[0 for c in dollarsplit[2:]]
             else:
                 oneDollarList = [1 for c in dollarsplit[2:]]
-            oneDollarList[len(oneDollarList):len(oneDollarList)]=twoDollarList
+
+            oneDollarList[len(oneDollarList):len(oneDollarList)]=twoDollardigitList
             extendElems=oneDollarList
         else:
             dollarsplit = value.split('$')
@@ -138,30 +145,24 @@ def dollarFuncCheck(memberlist,initVars):
                 extendElems = [0 for c in dollarsplit[2:]]
             else:
                 extendElems = [1 for c in dollarsplit[2:]]
-        dollarCheckResultsDict[key]=[funcName,extendElems]
+        oneDollarStrList = [c[:-1]for c in dollarsplit[2:]]
+        dollarCheckResultsDict[key]=[funcName,oneDollarStrList,extendElems]
     return dollarCheckResultsDict
-
 #################################################################################################
 
 def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
     AllList=SignalList[1]
     name=SignalList[0]
+    optionList = []
     TypeList=[]
     Memberlist=[]
     initVar=[]
     boolList=[]
-    signalvarslist=[]
     for e in AllList:
         TypeList.append(e['type'])
         Memberlist.append(e['varname'])
         initVar.append(e['Default'])
-
-    for i,bo in enumerate(TypeList):
-        if bo=='bool':
-            boolList.append(Memberlist[i])
-#######################get signal list########################
-        if bo=='signal':
-            signalvarslist.append(Memberlist[i])
+        optionList.append(e['option'])
 
 ####################Type,Name,sort in the first###############
     if 'Type' in Memberlist:
@@ -172,6 +173,8 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
         del TypeList[NameIndex+1]
         initVar.insert(0,initVar[NameIndex])
         del initVar[NameIndex+1]
+        optionList.insert(0, optionList[NameIndex])
+        del optionList[NameIndex + 1]
 
     if 'Name' in Memberlist:
         NameIndex=Memberlist.index('Name')
@@ -181,21 +184,21 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
         del TypeList[NameIndex+1]
         initVar.insert(0,initVar[NameIndex])
         del initVar[NameIndex+1]
+        optionList.insert(0, optionList[NameIndex])
+        del optionList[NameIndex + 1]
 
     signalfuncdict=dollarFuncCheck(Memberlist,initVar)
 
     waitForMemberlist=copy.deepcopy(Memberlist)
 
-####################job to expand types########################
-
-
+####################job to expand types#######################
     expandtype=['list<OrderByNominal>','list<OrderByVolume>']
     nameSuffix1=[['Nominal','Type'],['Volume','Type']]
-    TypeExpand(TypeList,Memberlist,initVar,expandtype,nameSuffix1,2)
+    TypeExpand(optionList,TypeList,Memberlist,initVar,expandtype,nameSuffix1,2)
     nameSuffix2=['InstrumentName','IsConnect','Market']
-    kwExpand(TypeList,Memberlist,initVar,nameSuffix2,'Instruments',1)
+    kwExpand(optionList,TypeList,Memberlist,initVar,nameSuffix2,'Instruments',1)
     nameSuffix3=['Action','START','END']
-    kwExpand(TypeList,Memberlist,initVar,nameSuffix3,'Ranges',1,False)
+    kwExpand(optionList,TypeList,Memberlist,initVar,nameSuffix3,'Ranges',1,False)
 
     if not os.path.exists(desPath):
         os.mkdir(desPath)
@@ -216,17 +219,17 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
 ######initialize the vars in the list######################
     for index,ivalue in enumerate(initVar):
         if ivalue =='""' or ivalue=="''":
-            f2.write('\040\040\040\040\040\040\040\040self.{0}=""\n'.format(Memberlist[index]))
+            f2.write('\040\040\040\040\040\040\040\040self.{0} = ""\n'.format(Memberlist[index]))
             continue
         elif str.lower(ivalue)=='true' or str.lower(ivalue)=='false':
-            f2.write("\040\040\040\040\040\040\040\040self.{0}={1}\n".format(Memberlist[index]
+            f2.write("\040\040\040\040\040\040\040\040self.{0} = {1}\n".format(Memberlist[index]
                      ,str.upper(ivalue)[0]+str.lower(ivalue)[1:]))
             continue
         elif re.match(r'[0-9]+',ivalue):
-            f2.write('''\040\040\040\040\040\040\040\040self.{0}={1}\n'''.format(Memberlist[index],ivalue))
+            f2.write('''\040\040\040\040\040\040\040\040self.{0} = {1}\n'''.format(Memberlist[index],ivalue))
             continue
         elif isinstance(ivalue,str):
-            f2.write('''\040\040\040\040\040\040\040\040self.{0}="{1}"\n'''.format(Memberlist[index],ivalue))
+            f2.write('''\040\040\040\040\040\040\040\040self.{0} = "{1}"\n'''.format(Memberlist[index],ivalue))
             continue
     f2.write('\n\040\040\040\040def get_const_member_list(self):\n\040\040\040\040\040\040\040\040member_list = [')
 
@@ -239,18 +242,30 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
         if i%3==0 and i!=0:
             f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040')
     f2.write('\n\040\040\040\040\040\040\040\040return member_list')
+
+    signalvarslist = [Memberlist[i] for i, var in enumerate(TypeList) if var == "signal"]
     f2.write('\n\n\040\040\040\040def get_signal_list(self):')
-    f2.write('\n\040\040\040\040\040\040\040\040signal_list={}'.format(signalvarslist))
+    f2.write('\n\040\040\040\040\040\040\040\040signal_list = {}'.format(signalvarslist))
     f2.write('\n\040\040\040\040\040\040\040\040return signal_list')
 
-    if len(signalfuncdict) != 0:
-        f2.write('\n\n\040\040\040\040def get_function_dict(self):')
-        f2.write('\n\040\040\040\040\040\040\040\040function_dict={}'.format(signalfuncdict))
-        f2.write('\n\040\040\040\040\040\040\040\040return function_dict')
+    required_member_list=[Memberlist[i] for i,var in enumerate(optionList) if var == "required"]
+    f2.write('\n\n\040\040\040\040def required_member_list(self):')
+    f2.write('\n\040\040\040\040\040\040\040\040required_list={}'.format(required_member_list))
+    f2.write('\n\040\040\040\040\040\040\040\040return required_list')
 
+    optional_member_list = [Memberlist[i] for i, var in enumerate(optionList) if var == "optional"]
+    f2.write('\n\n\040\040\040\040def optional_member_list(self):')
+    f2.write('\n\040\040\040\040\040\040\040\040optional_list={}'.format(optional_member_list))
+    f2.write('\n\040\040\040\040\040\040\040\040return optional_list')
 
+    # if len(signalfuncdict) != 0:
+    #     f2.write('\n\n\040\040\040\040def get_function_dict(self):')
+    #     f2.write('\n\040\040\040\040\040\040\040\040function_dict = {}'.format(signalfuncdict))
+    #     f2.write('\n\040\040\040\040\040\040\040\040return function_dict')
+
+    boolList = [Memberlist[i] for i, var in enumerate(TypeList) if var == "bool"]
     f2.write('\n\n\040\040\040\040def get_bool_list(self):')
-    f2.write('\n\040\040\040\040\040\040\040\040bool_list={0}'.format(boolList))
+    f2.write('\n\040\040\040\040\040\040\040\040bool_list = {0}'.format(boolList))
     f2.write('\n\040\040\040\040\040\040\040\040return bool_list')
     f2.write('\n\nclass {}Converter(object):'.format(name))
     f2.write('\n\n\040\040\040\040def __init__(self):')
@@ -279,21 +294,66 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
     f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040is_error=True''')
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040else:')
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040data_json[member] = getattr({0}Meta, member)'.format(name))
+
     if len(signalfuncdict) != 0:
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040for key,value in {}Meta.get_function_dict():'''.format(name))
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040param = re.split(r'[\(\)]+',data_json[key].strip())''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040param = re.split(r',',param[1].strip())''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040for i,e in enumerate(value[1]):''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040if e == 1:''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040param[i] = "{0}Meta."+param[i]'''.format(name))
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040temp = ""''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040for i,e in enumerate(param):''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040if i == len(param)-1:''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040temp += e''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040else:''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040temp += e + ","''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040FuncAndName = "${}({})".format(value[0],temp)''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}".format(value[0])] = reference_arg_manager("{}".format(FuncAndName))''')
+        for key,value in signalfuncdict.items():
+            param1 = ""
+            param2=""
+            param3=""
+            a=len(value[2])-len(value[1])
+            for i in range(len(value[2])):
+                if i != len(value[2])-1:
+                    param3 += '{},'.format(i)
+                else:
+                    param3 += '{}'.format(i)
+            for i, its in enumerate(value[1]):
+                if i == len(value[1]) - 1:
+                    if its == 'None' or its == 'none':
+                        param1 += its
+                    else:
+                        param1 += "{}Meta.".format(name) + its
+                else:
+                    if its == 'None' or its == 'none':
+                        param1 += its + ','
+                    else:
+                        param1 += "{}Meta.".format(name) + its + ','
+            if a !=0:
+                for i,its in enumerate(value[1]):
+                    if i == len(value[1])-1:
+                        param1 += "{}Meta.".format(name)+its
+                    else:
+                        param1 += "{}Meta.".format(name)+its+','
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = data_json["{}"].strip().split('$')'''.format(key))
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = param[1].split(',')''')
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[0] = param[0][1:]''')
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[-1] = param[-1][:-1]''')
+
+                for i in range(-a,0,1):
+                    if i == -a:
+                        if i != -1:
+                            param2 += 'param[{}],'.format(i)
+                        else:
+                            str1 = ""
+                            for i in range(-a, 0, 1):
+                                if i != -1:
+                                    str1 += 'param[{}]'.format(i) + ','
+                                else:
+                                    str1 += 'param[{}]'.format(i)
+                            param2 +=str
+                    else:
+                        if i == -1:
+                            str1=""
+                            for i in range(-a,0,1):
+                                if i != -1:
+                                    str1 += 'param[{}]'.format(i) + ','
+                                else:
+                                    str1 += 'param[{}]'.format(i)
+                            param2 +=str1
+                param2=param1+param2
+                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})"'.format(value[0],param3) + '.format({})'.format(param2))
+            else:
+                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})")'.format(value[0],param1))
+
 
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040if not is_error:')
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040signal_object = SignalObject()')
@@ -305,9 +365,6 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040self.__signal_object_list.append(signal_object)')
     f2.write("\n\040\040\040\040\040\040\040\040except Exception as e:")
     f2.write("\n\040\040\040\040\040\040\040\040\040\040\040\040raise CSVConverterError({0}Meta.Name, {0}Meta.Type, e.message)".format(name))
-
-
-
 
     f2.write('\n\n\040\040\040\040def get_signal_id(self, signal_id):')
     f2.write('\n\040\040\040\040\040\040\040\040signal_id_list = [signal_id]')
@@ -321,16 +378,18 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
 
     AllList=StrategyList[1]
     name=StrategyList[0]
-    TypeList=[]
-    Memberlist=[]
-    initVar=[]
-    boolList=[]
+    TypeList = []
+    Memberlist = []
+    initVar = []
+    boolList = []
+    optionList = []
     for e in AllList:
         TypeList.append(e['type'])
         Memberlist.append(e['varname'])
         initVar.append(e['Default'])
+        optionList.append(e['option'])
     for i,bo in enumerate(TypeList):
-        if bo=='bool':
+        if bo == 'bool':
             boolList.append(Memberlist[i])
     if 'Type' in Memberlist:
         NameIndex=Memberlist.index('Type')
@@ -340,6 +399,8 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
         del TypeList[NameIndex+1]
         initVar.insert(0,initVar[NameIndex])
         del initVar[NameIndex+1]
+        optionList.insert(0,optionList[NameIndex])
+        del optionList[NameIndex+1]
 
     if 'Name' in Memberlist:
         NameIndex=Memberlist.index('Name')
@@ -349,18 +410,25 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
         del TypeList[NameIndex+1]
         initVar.insert(0,initVar[NameIndex])
         del initVar[NameIndex+1]
+        optionList.insert(0, optionList[NameIndex])
+        del optionList[NameIndex + 1]
 
     signalfuncdict = dollarFuncCheck(Memberlist, initVar)
     waitForMemberlist=copy.deepcopy(Memberlist)
+    #######################get signal list########################
+    signalvarslist = []
+    for i,bo in enumerate(TypeList):
+        if bo == 'signal':
+            signalvarslist.append(Memberlist[i])
 ####################job to expand types########################
 
     expandtype=['list<OrderByNominal>','list<OrderByVolume>']
     nameSuffix1=[['Nominal','Type'],['Volume','Type']]
-    TypeExpand(TypeList,Memberlist,initVar,expandtype,nameSuffix1,2)
+    TypeExpand(optionList,TypeList,Memberlist,initVar,expandtype,nameSuffix1,2)
     nameSuffix2=['InstrumentName','IsConnect','Market']
-    kwExpand(TypeList,Memberlist,initVar,nameSuffix2,'Instruments',1)
+    kwExpand(optionList,TypeList,Memberlist,initVar,nameSuffix2,'Instruments',1)
     nameSuffix3=['Action','START','END']
-    kwExpand(TypeList,Memberlist,initVar,nameSuffix3,'Ranges',1,False)
+    kwExpand(optionList,TypeList,Memberlist,initVar,nameSuffix3,'Ranges',1,False)
 
     if not os.path.exists(desPath):
         os.mkdir(desPath)
@@ -381,17 +449,17 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
 ######initialize the vars in the list######################
     for index,ivalue in enumerate(initVar):
         if ivalue =='""' or ivalue=="''":
-            f2.write('\040\040\040\040\040\040\040\040self.{0}=""\n'.format(Memberlist[index]))
+            f2.write('\040\040\040\040\040\040\040\040self.{0} = ""\n'.format(Memberlist[index]))
             continue
         elif str.lower(ivalue)=='true' or str.lower(ivalue)=='false':
-            f2.write("\040\040\040\040\040\040\040\040self.{0}={1}\n".format(Memberlist[index]
+            f2.write("\040\040\040\040\040\040\040\040self.{0} = {1}\n".format(Memberlist[index]
                      ,str.upper(ivalue)[0]+str.lower(ivalue)[1:]))
             continue
         elif re.match(r'[0-9]+',ivalue):
-            f2.write('''\040\040\040\040\040\040\040\040self.{0}={1}\n'''.format(Memberlist[index],ivalue))
+            f2.write('''\040\040\040\040\040\040\040\040self.{0} = {1}\n'''.format(Memberlist[index],ivalue))
             continue
         elif isinstance(ivalue,str):
-            f2.write('''\040\040\040\040\040\040\040\040self.{0}="{1}"\n'''.format(Memberlist[index],ivalue))
+            f2.write('''\040\040\040\040\040\040\040\040self.{0} = "{1}"\n'''.format(Memberlist[index],ivalue))
             continue
 
     f2.write('\n\040\040\040\040def get_const_member_list(self):\n\040\040\040\040\040\040\040\040member_list = [')
@@ -404,26 +472,45 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
         f2.write("'{}',".format(waitForMemberlist[i]))
         if i%3==0 and i!=0:
             f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040')
-            
     f2.write('\n\040\040\040\040\040\040\040\040return member_list')
-    f2.write("\n\n\040\040\040\040def get_signal_list(self):\n\040\040\040\040\040\040\040\040signal_list = ['signal']\n\040\040\040\040\040\040\040\040return signal_list")
+
+    signalvarslist = [Memberlist[i] for i, var in enumerate(TypeList) if var == "signal"]
+    f2.write('\n\n\040\040\040\040def get_signal_list(self):')
+    f2.write('\n\040\040\040\040\040\040\040\040signal_list = {}'.format(signalvarslist))
+    f2.write('\n\040\040\040\040\040\040\040\040return signal_list')
+
+    required_member_list=[Memberlist[i] for i,var in enumerate(optionList) if var == "required"]
+    f2.write('\n\n\040\040\040\040def required_member_list(self):')
+    f2.write('\n\040\040\040\040\040\040\040\040required_list={}'.format(required_member_list))
+    f2.write('\n\040\040\040\040\040\040\040\040return required_list')
+
+    optional_member_list = [Memberlist[i] for i, var in enumerate(optionList) if var == "optional"]
+    f2.write('\n\n\040\040\040\040def optional_member_list(self):')
+    f2.write('\n\040\040\040\040\040\040\040\040optional_list={}'.format(optional_member_list))
+    f2.write('\n\040\040\040\040\040\040\040\040return optional_list')
+
+    boolList = [Memberlist[i] for i, var in enumerate(TypeList) if var == "bool"]
+    f2.write('\n\n\040\040\040\040def get_bool_list(self):')
+    f2.write('\n\040\040\040\040\040\040\040\040bool_list = {0}'.format(boolList))
+    f2.write('\n\040\040\040\040\040\040\040\040return bool_list')
+
     f2.write('\n\n\040\040\040\040def get_strategy_csv_header(self):\n\040\040\040\040\040\040\040\040header_list = []\n\040\040\040\040\040\040\040\040for header in dir(self):'
              "\n\040\040\040\040\040\040\040\040\040\040\040\040if header[:2] != '__' and header[-2:] != '__' and header[:4] != 'get_':"
              "\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040header_list.append(header)\n\040\040\040\040\040\040\040\040return header_list")
 
-    if len(signalfuncdict) != 0:
-        f2.write('\n\n\040\040\040\040def get_function_dict(self):')
-        f2.write('\n\040\040\040\040\040\040\040\040function_dict={}'.format(signalfuncdict))
-        f2.write('\n\040\040\040\040\040\040\040\040return function_dict')
+    # if len(signalfuncdict) != 0:
+    #     f2.write('\n\n\040\040\040\040def get_function_dict(self):')
+    #     f2.write('\n\040\040\040\040\040\040\040\040function_dict = {}'.format(signalfuncdict))
+    #     f2.write('\n\040\040\040\040\040\040\040\040return function_dict')
 
     f2.write("\n\n\040\040\040\040def get_portfolio_list(self):")
     f2.write("\n\040\040\040\040\040\040\040\040portfolio_list = ['Portfolio']")
     f2.write("\n\040\040\040\040\040\040\040\040return portfolio_list")
     f2.write("\n\n\040\040\040\040def get_bool_list(self):")
-    f2.write('''\n\040\040\040\040\040\040\040\040bool_list={}'''.format(boolList))
+    f2.write('''\n\040\040\040\040\040\040\040\040bool_list = {}'''.format(boolList))
     f2.write("\n\040\040\040\040\040\040\040\040return bool_list")
     f2.write("\n\n\040\040\040\040def get_MatchStrategyId(self):")
-    f2.write("\n\040\040\040\040\040\040\040\040ID_list=['MatchStrategyId']")
+    f2.write("\n\040\040\040\040\040\040\040\040ID_list = ['MatchStrategyId']")
     f2.write("\n\040\040\040\040\040\040\040\040return ID_list\n")
     f2.write("\nclass {}Converter(object):\n\040\040\040\040".format(name))
     f2.write("def __init__(self, work_dir=None):\n\040\040\040\040\040\040\040\040self.id = float('nan')\n\040\040\040\040\040\040\040\040self.__{}_meta_list = []"
@@ -453,21 +540,61 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
     f2.write("\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040else:\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040data_json[member] = member_value")
     f2.write("\n\040\040\040\040\040\040\040\040\040\040\040\040data_json['Instruments'] = generate_instruments({0}Meta, {0}Meta.member_list)".format(name))
     f2.write("\n\040\040\040\040\040\040\040\040\040\040\040\040data_json['Ranges'] = generate_ranges({0}Meta, {0}Meta.member_list)".format(name))
+
     if len(signalfuncdict) != 0:
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040for key,value in {}Meta.get_function_dict():'''.format(name))
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040param = re.split(r'[\(\)]+',data_json[key].strip())''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040param = re.split(r',',param[1].strip())''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040for i,e in enumerate(value[1]):''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040if e == 1:''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040param[i] = "{0}Meta."+param[i]'''.format(name))
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040temp = ""''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040for i,e in enumerate(param):''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040if i == len(param)-1:''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040temp += e''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040else:''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040temp += e + ","''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040FuncAndName = "${}({})".format(value[0],temp)''')
-        f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}".format(value[0])] = reference_arg_manager("{}".format(FuncAndName))''')
+        for key,value in signalfuncdict.items():
+            param1 = ""
+            param2=""
+            a=len(value[2])-len(value[1])
+            for i, its in enumerate(value[1]):
+                if i == len(value[1]) - 1:
+                    if its == 'None' or its == 'none':
+                        param1 += its
+                    else:
+                        param1 += "{}Meta.".format(name) + its
+                else:
+                    if its == 'None' or its == 'none':
+                        param1 += its + ','
+                    else:
+                        param1 += "{}Meta.".format(name) + its + ','
+            if a !=0:
+                for i,its in enumerate(value[1]):
+                    if i == len(value[1])-1:
+                        param1 += "{}Meta.".format(name)+its
+                    else:
+                        param1 += "{}Meta.".format(name)+its+','
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = data_json["{}"].strip().split('$')'''.format(key))
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = param[1].split(',')''')
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[0] = param[0][1:]''')
+                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[-1] = param[-1][:-1]''')
+
+                for i in range(-a,0,1):
+                    if i == -a:
+                        if i != -1:
+                            param2 += ',{},'
+                        else:
+                            str1 = ""
+                            for i in range(-a, 0, 1):
+                                if i != -1:
+                                    str1 += 'param[{}]'.format(i) + ','
+                                else:
+                                    str1 += 'param[{}]'.format(i)
+                            param2 += ',{})"' + '.format({})'.format(str1)
+                    else:
+                        if i == -1:
+                            str1=""
+                            for i in range(-a,0,1):
+                                if i != -1:
+                                    str1 += 'param[{}]'.format(i) + ','
+                                else:
+                                    str1 += 'param[{}]'.format(i)
+                            param2 += '{})"'+'.format({})'.format(str1)
+                        else:
+                            param2 += '{},'
+                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({}'.format(value[0],param1) + '{})'.format(param2))
+            else:
+                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})")'.format(value[0],param1))
+
 
     f2.write("\n\040\040\040\040\040\040\040\040except Exception as e:")
     f2.write("\n\040\040\040\040\040\040\040\040\040\040\040\040raise CSVConverterError({0}Meta.Name, {0}Meta.Type, e.message)".format(name))

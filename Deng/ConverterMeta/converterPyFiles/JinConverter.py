@@ -7,21 +7,29 @@ from MiniMOManager.common.ConverterManager.Util import reference_portfolio, gene
 class JinMeta(OrderedObject):
     def __init__(self):
         super(JinMeta,self).__init__()
-        self.Name=""
-        self.Type="Jin"
-        self.NeedSigalDataFromAthene=""
-        self.Mode="Autonomy"
+        self.Name = ""
+        self.Type = "Jin"
+        self.NeedSigalDataFromAthene = ""
+        self.Mode = "Autonomy"
 
     def get_const_member_list(self):
         member_list = ['Name','Type','NeedSigalDataFromAthene','Mode']
         return member_list
 
     def get_signal_list(self):
-        signal_list=[]
+        signal_list = []
         return signal_list
 
+    def required_member_list(self):
+        required_list=['Name', 'Type', 'NeedSigalDataFromAthene']
+        return required_list
+
+    def optional_member_list(self):
+        optional_list=['Mode']
+        return optional_list
+
     def get_bool_list(self):
-        bool_list=['NeedSigalDataFromAthene']
+        bool_list = ['NeedSigalDataFromAthene']
         return bool_list
 
 class JinConverter(object):

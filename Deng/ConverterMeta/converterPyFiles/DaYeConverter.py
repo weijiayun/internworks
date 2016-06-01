@@ -7,15 +7,15 @@ from MiniMOManager.common.ConverterManager.Util import reference_portfolio, gene
 class DaYeMeta(OrderedObject):
     def __init__(self):
         super(DaYeMeta,self).__init__()
-        self.Name=""
-        self.Type="DaYe"
-        self.CloseDay=""
-        self.DependentSignalId=""
-        self.Interval=""
-        self.ClosePosTime=""
-        self.OpenPosTime=""
-        self.NeedSigalDataFromAthene=""
-        self.Mode="Autonomy"
+        self.Name = ""
+        self.Type = "DaYe"
+        self.CloseDay = ""
+        self.DependentSignalId = ""
+        self.Interval = ""
+        self.ClosePosTime = ""
+        self.OpenPosTime = ""
+        self.NeedSigalDataFromAthene = ""
+        self.Mode = "Autonomy"
 
     def get_const_member_list(self):
         member_list = ['Name','Type','CloseDay','DependentSignalId',
@@ -24,11 +24,19 @@ class DaYeMeta(OrderedObject):
         return member_list
 
     def get_signal_list(self):
-        signal_list=[]
+        signal_list = []
         return signal_list
 
+    def required_member_list(self):
+        required_list=['Name', 'Type', 'CloseDay', 'DependentSignalId', 'Interval', 'ClosePosTime', 'OpenPosTime', 'NeedSigalDataFromAthene']
+        return required_list
+
+    def optional_member_list(self):
+        optional_list=['Mode']
+        return optional_list
+
     def get_bool_list(self):
-        bool_list=['NeedSigalDataFromAthene']
+        bool_list = ['NeedSigalDataFromAthene']
         return bool_list
 
 class DaYeConverter(object):

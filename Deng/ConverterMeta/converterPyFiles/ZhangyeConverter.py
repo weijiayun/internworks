@@ -9,42 +9,42 @@ from MiniMOManager.common.ConverterManager.Util import reference_portfolio, gene
 class ZhangyeMeta(OrderedObject):
     def __init__(self):
         super(ZhangyeMeta,self).__init__()
-        self.Name=""
-        self.Type="Zhangye"
-        self.PriceLimitForClosePosition=""
-        self.PriceLimitForOpenPosition=""
-        self.IVUnitForClosePosition=""
-        self.IVUnitForOpenPosition=""
-        self.LossThresholdForClosePosition=""
-        self.LossThresholdForOpenPosition=""
-        self.DaysToMaturityForClosePosition=""
-        self.DaysToMaturityForOpenPosition=""
-        self.StopLossRatio=""
-        self.TargetPosition=""
-        self.UnderlyingInstName=""
-        self.ActionTime=""
-        self.DependentSignalId=""
-        self.MinMaxPositionChangePercent=""
-        self.XN=""
-        self.XD=""
-        self.IsNightTrade=True
-        self.IsDayTrade=True
-        self.OrderType="OTGFD"
-        self.MatchType=""
-        self.Market=""
-        self.Action1=""
-        self.START1=""
-        self.END1=""
-        self.EmitterType=""
-        self.PreHardCloseSpread=0
-        self.GTNBWaitTime=1000
-        self.GTNBTolerance=0
-        self.HCslip=5
-        self.Instruments_InstrumentName1=""
-        self.Instruments_IsConnect1=""
-        self.Instruments_Market1=""
-        self.Portfolio=""
-        self.Enabled=1
+        self.Name = ""
+        self.Type = "Zhangye"
+        self.PriceLimitForClosePosition = ""
+        self.PriceLimitForOpenPosition = ""
+        self.IVUnitForClosePosition = ""
+        self.IVUnitForOpenPosition = ""
+        self.LossThresholdForClosePosition = ""
+        self.LossThresholdForOpenPosition = ""
+        self.DaysToMaturityForClosePosition = ""
+        self.DaysToMaturityForOpenPosition = ""
+        self.StopLossRatio = ""
+        self.TargetPosition = ""
+        self.UnderlyingInstName = ""
+        self.ActionTime = ""
+        self.DependentSignalId = ""
+        self.MinMaxPositionChangePercent = ""
+        self.XN = ""
+        self.XD = ""
+        self.IsNightTrade = True
+        self.IsDayTrade = True
+        self.OrderType = "OTGFD"
+        self.MatchType = ""
+        self.Market = ""
+        self.Action1 = ""
+        self.START1 = ""
+        self.END1 = ""
+        self.EmitterType = ""
+        self.PreHardCloseSpread = 0
+        self.GTNBWaitTime = 1000
+        self.GTNBTolerance = 0
+        self.HCslip = 5
+        self.Instruments_InstrumentName1 = ""
+        self.Instruments_IsConnect1 = ""
+        self.Instruments_Market1 = ""
+        self.Portfolio = ""
+        self.Enabled = 1
 
     def get_const_member_list(self):
         member_list = ['Name','Type','PriceLimitForClosePosition','PriceLimitForOpenPosition',
@@ -60,8 +60,20 @@ class ZhangyeMeta(OrderedObject):
         return member_list
 
     def get_signal_list(self):
-        signal_list = ['signal']
+        signal_list = []
         return signal_list
+
+    def required_member_list(self):
+        required_list=['Name', 'Type', 'PriceLimitForClosePosition', 'PriceLimitForOpenPosition', 'IVUnitForClosePosition', 'IVUnitForOpenPosition', 'LossThresholdForClosePosition', 'LossThresholdForOpenPosition', 'DaysToMaturityForClosePosition', 'DaysToMaturityForOpenPosition', 'StopLossRatio', 'TargetPosition', 'UnderlyingInstName', 'ActionTime', 'DependentSignalId', 'MinMaxPositionChangePercent', 'XN', 'XD', 'EmitterType', 'Instruments_InstrumentName1', 'Instruments_IsConnect1', 'Instruments_Market1', 'Portfolio']
+        return required_list
+
+    def optional_member_list(self):
+        optional_list=['IsNightTrade', 'IsDayTrade', 'OrderType', 'MatchType', 'Market', 'Action1', 'START1', 'END1', 'PreHardCloseSpread', 'GTNBWaitTime', 'GTNBTolerance', 'HCslip', 'Enabled']
+        return optional_list
+
+    def get_bool_list(self):
+        bool_list = ['IsNightTrade', 'IsDayTrade', 'Enabled']
+        return bool_list
 
     def get_strategy_csv_header(self):
         header_list = []
@@ -75,11 +87,11 @@ class ZhangyeMeta(OrderedObject):
         return portfolio_list
 
     def get_bool_list(self):
-        bool_list=['IsNightTrade', 'IsDayTrade', 'Enabled']
+        bool_list = ['IsNightTrade', 'IsDayTrade', 'Enabled']
         return bool_list
 
     def get_MatchStrategyId(self):
-        ID_list=['MatchStrategyId']
+        ID_list = ['MatchStrategyId']
         return ID_list
 
 class ZhangyeConverter(object):

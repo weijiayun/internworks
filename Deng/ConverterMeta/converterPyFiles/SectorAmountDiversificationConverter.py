@@ -4,19 +4,23 @@ from MiniMOManager.common.SignalManager import SignalObject, SignalFinder
 from MiniMOManager.common.Util import get_max_id, is_bool, is_instrument_name, OrderedObject, CSVConverterError, get_strategy_id_by_name
 from MiniMOManager.common.ConverterManager.Util import reference_portfolio, generate_ranges, generate_instruments, reference_HeFeiSub, reference_arg_manager
 
-class TradingUniverseMeta(OrderedObject):
+class SectorAmountDiversificationMeta(OrderedObject):
     def __init__(self):
-        super(TradingUniverseMeta,self).__init__()
+        super(SectorAmountDiversificationMeta,self).__init__()
         self.Name = ""
-        self.Type = "TradingUniverse"
+        self.Type = "SectorAmountDiversification"
         self.BalanceDateSignal = ""
-        self.TradingUniverse = ""
+        self.SectorAmountDiversification = ""
+        self.MAWin = ""
+        self.SegmentDays = ""
+        self.CalculateDate = ""
         self.Enabled = 1
         self.NeedSigalDataFromAthene = ""
         self.Mode = "Autonomy"
 
     def get_const_member_list(self):
-        member_list = ['Name','Type','BalanceDateSignal','TradingUniverse',
+        member_list = ['Name','Type','BalanceDateSignal','SectorAmountDiversification',
+            'MAWin','SegmentDays','CalculateDate',
             'Enabled','NeedSigalDataFromAthene','Mode']
         return member_list
 
@@ -25,7 +29,7 @@ class TradingUniverseMeta(OrderedObject):
         return signal_list
 
     def required_member_list(self):
-        required_list=['Name', 'Type', 'BalanceDateSignal', 'TradingUniverse', 'NeedSigalDataFromAthene']
+        required_list=['Name', 'Type', 'BalanceDateSignal', 'SectorAmountDiversification', 'MAWin', 'SegmentDays', 'CalculateDate', 'NeedSigalDataFromAthene']
         return required_list
 
     def optional_member_list(self):
@@ -36,45 +40,45 @@ class TradingUniverseMeta(OrderedObject):
         bool_list = ['Enabled', 'NeedSigalDataFromAthene']
         return bool_list
 
-class TradingUniverseConverter(object):
+class SectorAmountDiversificationConverter(object):
 
     def __init__(self):
-        self.__TradingUniverse_meta_list = []
+        self.__SectorAmountDiversification_meta_list = []
         self.__signal_object_list = []
 
-    def set_meat_list(self, TradingUniverse_meta_list):
-        self.__TradingUniverse_meta_list = TradingUniverse_meta_list
+    def set_meat_list(self, SectorAmountDiversification_meta_list):
+        self.__SectorAmountDiversification_meta_list = SectorAmountDiversification_meta_list
 
     def start_converter(self):
-        for meta in self.__TradingUniverse_meta_list:
+        for meta in self.__SectorAmountDiversification_meta_list:
             self.strategy_to_json(meta)
         return self.__signal_object_list
 
-    def strategy_to_json(self, TradingUniverseMeta):
+    def strategy_to_json(self, SectorAmountDiversificationMeta):
         data_json = {}
         try:
             signal_finder = SignalFinder()
             is_error = False
-            for member in TradingUniverseMeta.get_const_member_list():
-                member_value = getattr(TradingUniverseMeta, member)
-                if member in TradingUniverseMeta.get_bool_list():
-                    data_json[member] = is_bool(getattr(TradingUniverseMeta, member))
-                elif member in TradingUniverseMeta.get_signal_list():
+            for member in SectorAmountDiversificationMeta.get_const_member_list():
+                member_value = getattr(SectorAmountDiversificationMeta, member)
+                if member in SectorAmountDiversificationMeta.get_bool_list():
+                    data_json[member] = is_bool(getattr(SectorAmountDiversificationMeta, member))
+                elif member in SectorAmountDiversificationMeta.get_signal_list():
                     data_json[member] = (signal_finder.get_signal_id_by_name(member_value), member_value)[isinstance(member_value, int)]
                     if data_json[member] == -1:
                         is_error=True
                 else:
-                    data_json[member] = getattr(TradingUniverseMeta, member)
-            data_json["TradingUniverse"] = reference_arg_manager("$GetTradingUniverse(None)")
+                    data_json[member] = getattr(SectorAmountDiversificationMeta, member)
+            data_json["SectorAmountDiversification"] = reference_arg_manager("$GetSectorAmountDiversification(SectorAmountDiversificationMeta.CalculateDate,SectorAmountDiversificationMeta.SegmentDays,SectorAmountDiversificationMeta.MAWin)")
             if not is_error:
                 signal_object = SignalObject()
-                signal_object.name = TradingUniverseMeta.Name
-                signal_object.type = TradingUniverseMeta.Type
+                signal_object.name = SectorAmountDiversificationMeta.Name
+                signal_object.type = SectorAmountDiversificationMeta.Type
                 signal_object.enable = True
                 signal_object.node = json.dumps(data_json)
                 self.__signal_object_list.append(signal_object)
         except Exception as e:
-            raise CSVConverterError(TradingUniverseMeta.Name, TradingUniverseMeta.Type, e.message)
+            raise CSVConverterError(SectorAmountDiversificationMeta.Name, SectorAmountDiversificationMeta.Type, e.message)
 
     def get_signal_id(self, signal_id):
         signal_id_list = [signal_id]

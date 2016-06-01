@@ -6,23 +6,24 @@ from MiniMOManager.common.SignalManager import SignalFinder
 from MiniMOManager.common.Util import get_max_id, is_bool, is_instrument_name, OrderedObject, CSVConverterError, get_strategy_id_by_name
 from MiniMOManager.common.ConverterManager.Util import reference_portfolio, generate_ranges, generate_instruments, reference_HeFeiSub, reference_arg_manager
 
-class TianJinMeta(OrderedObject):
+class QingDaoMeta(OrderedObject):
     def __init__(self):
-        super(TianJinMeta,self).__init__()
+        super(QingDaoMeta,self).__init__()
         self.Name = ""
-        self.Type = "TianJin"
+        self.Type = "QingDao"
+        self.ActionTime = ""
+        self.IndexInstrument = ""
+        self.SortByAscend = ""
+        self.SignalSource = ""
+        self.DependentSignalId = ""
+        self.BVolumeLimit = ""
+        self.AVolumeLimit = ""
+        self.SellPos = ""
+        self.HoldPos = ""
+        self.MinMaxPositionChangePercent = ""
         self.XN = ""
         self.XD = ""
-        self.OrderBookByNominal_Type1 = ""
-        self.OrderBookByNominal_Nominal1 = ""
-        self.OrderBookByNominal_Type2 = ""
-        self.OrderBookByNominal_Nominal2 = ""
-        self.OrderBookByVolume_Type1 = ""
-        self.OrderBookByVolume_Volume1 = ""
-        self.OrderBookByVolume_Type2 = ""
-        self.OrderBookByVolume_Volume2 = ""
-        self.StartTime = ""
-        self.MinMaxPositionChangePercent = ""
+        self.IsNightTrade = True
         self.IsDayTrade = True
         self.OrderType = "OTGFD"
         self.MatchType = ""
@@ -42,28 +43,31 @@ class TianJinMeta(OrderedObject):
         self.Enabled = 1
 
     def get_const_member_list(self):
-        member_list = ['Name','Type','XN','XD',
-            'OrderBookByNominal','OrderBookByVolume','StartTime',
-            'MinMaxPositionChangePercent','IsDayTrade','OrderType',
-            'MatchType','Market','EmitterType',
-            'PreHardCloseSpread','GTNBWaitTime','GTNBTolerance',
-            'HCslip','Portfolio','Enabled']
+        member_list = ['Name','Type','ActionTime','IndexInstrument',
+            'SortByAscend','SignalSource','DependentSignalId',
+            'BVolumeLimit','AVolumeLimit','SellPos',
+            'HoldPos','MinMaxPositionChangePercent','XN',
+            'XD','IsNightTrade','IsDayTrade',
+            'OrderType','MatchType','Market',
+            'EmitterType','PreHardCloseSpread','GTNBWaitTime',
+            'GTNBTolerance','HCslip','Portfolio',
+            'Enabled']
         return member_list
 
     def get_signal_list(self):
-        signal_list = []
+        signal_list = ['DependentSignalId']
         return signal_list
 
     def required_member_list(self):
-        required_list=['Name', 'Type', 'XN', 'XD', 'OrderBookByNominal_Type1', 'OrderBookByNominal_Nominal1', 'OrderBookByNominal_Type2', 'OrderBookByNominal_Nominal2', 'OrderBookByVolume_Type1', 'OrderBookByVolume_Volume1', 'OrderBookByVolume_Type2', 'OrderBookByVolume_Volume2', 'StartTime', 'MinMaxPositionChangePercent', 'EmitterType', 'Instruments_InstrumentName1', 'Instruments_IsConnect1', 'Instruments_Market1', 'Portfolio']
+        required_list=['Name', 'Type', 'ActionTime', 'IndexInstrument', 'SortByAscend', 'SignalSource', 'DependentSignalId', 'BVolumeLimit', 'AVolumeLimit', 'SellPos', 'HoldPos', 'MinMaxPositionChangePercent', 'XN', 'XD', 'EmitterType', 'Instruments_InstrumentName1', 'Instruments_IsConnect1', 'Instruments_Market1', 'Portfolio']
         return required_list
 
     def optional_member_list(self):
-        optional_list=['IsDayTrade', 'OrderType', 'MatchType', 'Market', 'Action1', 'START1', 'END1', 'PreHardCloseSpread', 'GTNBWaitTime', 'GTNBTolerance', 'HCslip', 'Enabled']
+        optional_list=['IsNightTrade', 'IsDayTrade', 'OrderType', 'MatchType', 'Market', 'Action1', 'START1', 'END1', 'PreHardCloseSpread', 'GTNBWaitTime', 'GTNBTolerance', 'HCslip', 'Enabled']
         return optional_list
 
     def get_bool_list(self):
-        bool_list = ['IsDayTrade', 'Enabled']
+        bool_list = ['SortByAscend', 'IsNightTrade', 'IsDayTrade', 'Enabled']
         return bool_list
 
     def get_strategy_csv_header(self):
@@ -78,25 +82,25 @@ class TianJinMeta(OrderedObject):
         return portfolio_list
 
     def get_bool_list(self):
-        bool_list = ['IsDayTrade', 'Enabled']
+        bool_list = ['SortByAscend', 'IsNightTrade', 'IsDayTrade', 'Enabled']
         return bool_list
 
     def get_MatchStrategyId(self):
         ID_list = ['MatchStrategyId']
         return ID_list
 
-class TianJinConverter(object):
+class QingDaoConverter(object):
     def __init__(self, work_dir=None):
         self.id = float('nan')
-        self.__TianJin_meta_list = []
+        self.__QingDao_meta_list = []
         self.work_dir = work_dir
         self.__bp_manager = None
         
     def set_meat_list(self, HeFeiV3_meta_list):
-        self.__TianJin_meta_list = HeFeiV3_meta_list
+        self.__QingDao_meta_list = HeFeiV3_meta_list
 
     def get_meat_list(self):
-        return self.__TianJin_meta_list
+        return self.__QingDao_meta_list
 
     def init_bp_manager(self):
         if self.__bp_manager is None:
@@ -110,36 +114,36 @@ class TianJinConverter(object):
     def start_converter(self):
         self.init_bp_manager()
         self.init_strategy_id()
-        for meta in self.__TianJin_meta_list:
+        for meta in self.__QingDao_meta_list:
             self.strategy_to_json(meta)
 
-    def strategy_to_json(self, TianJinMeta):
+    def strategy_to_json(self, QingDaoMeta):
         data_json = {}
         try:
             signal_finder = SignalFinder()
-            for member in TianJinMeta.get_const_member_list():
-                member_value = getattr(TianJinMeta, member)
-                if member in TianJinMeta.get_portfolio_list():
+            for member in QingDaoMeta.get_const_member_list():
+                member_value = getattr(QingDaoMeta, member)
+                if member in QingDaoMeta.get_portfolio_list():
                     data_json[member] = reference_portfolio(member_value)
                     if data_json[member] == -1:
-                        raise CSVConverterError(TianJinMeta.Name, TianJinMeta.Type, "Can't find portfolio: {0}".format(member_value))
-                elif member in TianJinMeta.get_signal_list():
+                        raise CSVConverterError(QingDaoMeta.Name, QingDaoMeta.Type, "Can't find portfolio: {0}".format(member_value))
+                elif member in QingDaoMeta.get_signal_list():
                     data_json[member] = (signal_finder.get_signal_id_by_name(member_value), member_value)[isinstance(member_value, int)]
                     if data_json[member] == -1:
-                        raise CSVConverterError(TianJinMeta.Name, TianJinMeta.Type, "Can't find signal: {0}".format(member_value))
+                        raise CSVConverterError(QingDaoMeta.Name, QingDaoMeta.Type, "Can't find signal: {0}".format(member_value))
 
-                elif member in TianJinMeta.get_bool_list():
+                elif member in QingDaoMeta.get_bool_list():
                     data_json[member] = is_bool(member_value)
-                elif member in TianJinMeta.get_MatchStrategyId():
+                elif member in QingDaoMeta.get_MatchStrategyId():
                     data_json[member] = (get_strategy_id_by_name(self.work_dir, member_value), member_value)[isinstance(member_value, int)]
                     if data_json[member] == -1:
-                        raise CSVConverterError(TianJinMeta.Name, TianJinMeta.Type, "Can't find matchstrategy:{0}".format(member_value))
+                        raise CSVConverterError(QingDaoMeta.Name, QingDaoMeta.Type, "Can't find matchstrategy:{0}".format(member_value))
                 else:
                     data_json[member] = member_value
-            data_json['Instruments'] = generate_instruments(TianJinMeta, TianJinMeta.member_list)
-            data_json['Ranges'] = generate_ranges(TianJinMeta, TianJinMeta.member_list)
+            data_json['Instruments'] = generate_instruments(QingDaoMeta, QingDaoMeta.member_list)
+            data_json['Ranges'] = generate_ranges(QingDaoMeta, QingDaoMeta.member_list)
         except Exception as e:
-            raise CSVConverterError(TianJinMeta.Name, TianJinMeta.Type, e.message)
+            raise CSVConverterError(QingDaoMeta.Name, QingDaoMeta.Type, e.message)
         if self.work_dir is not None:
             self.__create_file(data_json)
         return data_json

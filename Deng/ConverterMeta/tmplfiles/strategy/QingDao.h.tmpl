@@ -1,0 +1,34 @@
+struct QingDao(Strategy:strategy)
+{
+    required string ActionTime reference DateTime;
+    required string IndexInstrument;
+    required bool SortByAscend;
+    required string SignalSource;
+    required signal DependentSignalId;
+    required double BVolumeLimit;
+    required double AVolumeLimit;
+    required sint32 SellPos;
+    required sint32 HoldPos;
+    required string Type equal QingDao;
+    required double MinMaxPositionChangePercent;
+    required sint32 XN;
+    required sint32 XD;
+    optional bool IsNightTrade default true;
+    optional bool IsDayTrade default true;
+    optional OrderType::type OrderType default OTGFD;
+    optional string MatchType default "";
+    optional string Market reference market default "";
+    optional list<StrategyTradingRange> Ranges;
+    required string EmitterType reference IInstructionEmitter;
+    optional sint32 PreHardCloseSpread default 0;
+    optional sint32 GTNBWaitTime default 1000;
+    optional sint32 GTNBTolerance default 0;
+    optional sint32 HCslip default 5;
+    required list<FeederWithMarket> Instruments;
+    required uint32 Portfolio reference Portfolio;
+    optional bool Enabled default 1;
+    optional string Description default "";
+    required uint32 Id;
+    required string Name;
+};
+
