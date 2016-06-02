@@ -1,6 +1,7 @@
 struct South(Signal:MapValueSignal)
 {
     required list<string> South equal $GetSouth($BalanceDate,$$9);
+    required list<string> South1 equal $GetSouth($BalanceDate,$$9);
     required signal BalanceDateSignal;
     required string BalanceDate;
     required string Type equal South;

@@ -69,7 +69,7 @@ class SectorAmountDiversificationConverter(object):
                         is_error=True
                 else:
                     data_json[member] = getattr(SectorAmountDiversificationMeta, member)
-            data_json["SectorAmountDiversification"] = reference_arg_manager("$GetSectorAmountDiversification(SectorAmountDiversificationMeta.CalculateDate,SectorAmountDiversificationMeta.SegmentDays,SectorAmountDiversificationMeta.MAWin)")
+            data_json["SectorAmountDiversification"] = reference_arg_manager("$GetSectorAmountDiversification({0},{1},{2})".format(SectorAmountDiversificationMeta.CalculateDate,SectorAmountDiversificationMeta.SegmentDays,SectorAmountDiversificationMeta.MAWin))
             if not is_error:
                 signal_object = SignalObject()
                 signal_object.name = SectorAmountDiversificationMeta.Name

@@ -1,0 +1,104 @@
+#!/usr/bin/python
+#Filename:addrlist.py
+#import cPickle as p
+class Memberinfo:
+    '''Represent any member in your addrlist'''
+    def __init__(self,name,email,phone):
+        '''Initalize the Member elements'''
+        self.name=name
+        self.email=email
+        self.phone=phone
+###################################################################################################
+class Contact:
+    def __init__(self):
+        '''initialized a empty dictionary'''
+        self.__Contactslist={}
+    def addMember(self,member):
+        '''Add member to the contact list'''
+        self.__Contactslist[member.name]=member
+        print 'Successfully save the contact info of "%s"'%member.name
+
+    def delMember(self,delname):
+        '''Delete a member of the contact list'''
+        if self.__Contactslist.has_key(delname):#or name in self.__Contactslist
+            while True:
+                confirm=raw_input('Confirm to delete contact information of "%s"? (y or n) '%delname)
+                if confirm=='y' or confirm=='yes':
+                    del self.__Contactslist[delname]
+                    print 'Successfully delete %s, done'%delname
+                    break
+                elif confirm=='n' or confirm=='no':
+                    print 'Discard to delete %s'%delname
+                    break
+                else:
+                    print 'WRONG input,please input y or n'
+                    continue
+        else:
+            print 'These is no contact information of "%s"'%delname
+            
+    def dispList(self):
+        '''Display the Contact list'''
+        if len(self.__Contactslist)!=0:
+            for name,info in self.__Contactslist.items():
+                print 'Information of %s\nName:\t%s\nEmail:\t%s\nPhone:\t%s\n'\
+                    %(name,info.name,info.email,info.phone)
+        else:
+            print 'This Contact list is EMPTY now'
+    def dispMember(self,name):
+        '''Display the single member of the contact list'''
+        if self.__Contactslist.has_key(name):#or name in self.__Contactslist
+            info=self.__Contactslist[name]
+            print 'Infomation of %s\nName:\t%s\nEmail:\t%s\nPhone:\t%s\n'\
+                %(name,info.name,info.email,info.phone)
+        else:
+            print 'These is no contact information of "%s"'%name
+            
+    def saveContacts(self,address):
+        '''Save the contact list to file,the parameter is the target address'''
+        if len(self.__Contactslist)!=0:
+            f=open(address,'w+')
+            for name,info in self.__Contactslist.items():
+                mess= 'Infomation of "%s"\nName:\t%s\nEmail:\t%s\nPhone:\t%s\n'\
+                      %(name,info.name,info.email,info.phone)
+                f.write(mess)
+            f.close()
+    def sort(self,reverse):
+        '''Sort the contacts list with two certain order'''
+        key=[]
+        value=[]
+        for k,val in self.__Contactslist:
+            key.append(k)
+            value.append(val)
+        size1=len(key)
+        size2=size1
+        for i in range(0,size1):
+            for j in range(0,size2-1):
+                if reverse:
+                    if key[i]>key[i+1]:
+                        temp=key[i]
+                        key[i]=key[i+1]
+                        key[i+1]=temp
+                        temp=value[i]
+                        value[i]=value[i+1]
+                        value[i+1]=temp
+                else:
+                    if key[i]<=key[i+1]:
+                        temp=key[i]
+                        key[i]=key[i+1]
+                        key[i+1]=temp
+                        temp=value[i]
+                        value[i]=value[i+1]
+                        value[i+1]=temp
+                        
+            size-=1
+        newDict={}
+        for i in range(0,size1):
+            newDict[key[i]]=value[i]
+        self.__Contactslist=newDict
+        
+
+
+            
+            
+            
+                

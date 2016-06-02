@@ -86,10 +86,6 @@ class ZhangyeMeta(OrderedObject):
         portfolio_list = ['Portfolio']
         return portfolio_list
 
-    def get_bool_list(self):
-        bool_list = ['IsNightTrade', 'IsDayTrade', 'Enabled']
-        return bool_list
-
     def get_MatchStrategyId(self):
         ID_list = ['MatchStrategyId']
         return ID_list

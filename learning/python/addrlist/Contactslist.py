@@ -1,0 +1,101 @@
+#!/usr/bin/python
+#Filename:Contactslist.py
+class Memberinfo:
+    '''Represent any member in your addrlist'''
+    def __init__(self,name,email,phone):
+        '''Initalize the Member elements'''
+        self.name=name
+        self.email=email
+        self.phone=phone
+###################################################################################################
+class Contact:
+    '''Make a contacts list'''
+    def __init__(self):
+        '''initialized a empty dictionary'''
+        self.__ContactsDict={}
+        self.__ContactsList=[]
+    def addMember(self,member):
+        '''Add member to the contact list'''
+        self.__ContactsDict[member.name]=member
+        self.__ContactsList.append((member.name,member))
+        print 'Successfully save the contact info of "%s"'%member.name
+
+    def delMember(self,delname):
+        '''Delete a member of the contact list'''
+        if self.__ContactsDict.has_key(delname):#or name in self.__ContactsDict
+            while True:
+                confirm=raw_input('Confirm to delete contact information of "%s"? (y or n) '%delname)
+                if confirm=='y' or confirm=='yes':
+                    del self.__ContactsDict[delname]
+                    temp=self.__ContactsList
+                    for i in range(0,len(temp)):
+                        if temp[i][0]==delname:
+                            self.__ContactsList.pop(i)
+                            break
+                    print 'Successfully delete %s, done'%delname
+                    break
+                elif confirm=='n' or confirm=='no':
+                    print 'Discard to delete %s'%delname
+                    break
+                else:
+                    print 'WRONG input,please input y or n'
+                    continue
+        else:
+            print 'These is no contact information of "%s"'%delname
+            
+    def dispMembers(self):
+        '''Display the Contact list'''
+        temp=self.__ContactsList
+        if len(temp)!=0:
+            for i in range(0,len(temp)):
+                print 'Information of %s\nName:\t%s\nEmail:\t%s\nPhone:\t%s\n'\
+                    %(temp[i][0],temp[i][1].name,temp[i][1].email,temp[i][1].phone)
+        else:
+            print 'This Contact list is EMPTY now'
+    def findMember(self,name):
+        '''find the a member in the contact list and display it'''
+        if self.__ContactsDict.has_key(name):#or name in self.__ContactsDict
+            info=self.__ContactsDict[name]
+            print 'Infomation of %s\nName:\t%s\nEmail:\t%s\nPhone:\t%s\n'\
+                %(name,info.name,info.email,info.phone)
+        else:
+            print 'These is no contact information of "%s"'%name
+            
+    def saveContacts(self,address):
+        '''Save the contact list to file,the parameter is the target address'''
+        temp=self.__ContactsList
+        if len(temp)!=0:
+            f=open(address,'w+')
+            for i in range(0,len(temp)):
+                mess= 'Infomation of "%s"\nName:\t%s\nEmail:\t%s\nPhone:\t%s\n'\
+                      %(temp[i][0],temp[i][1].name,temp[i][1].email,temp[i][1].phone)
+                f.write(mess)
+            f.close()
+    def sort(self,reverse=1):
+        '''Sort the contacts list, when do not specify the reverse
+        default reverse=1,which means 0-9a-zA-z,while reverse=0,wh-
+        ich means Z-Az-a9-0'''
+        temp=self.__ContactsList
+        size1=len(temp)
+        size2=size1
+        if size1>1:
+            for i in range(0,size1):
+                for j in range(0,size2-1):
+                    if reverse:
+                        if temp[j][0]>temp[j+1][0]:
+                            Temptuple=temp[j+1]
+                            self.__ContactsList[j+1]=self.__ContactsList[j]
+                            self.__ContactsList[j]=Temptuple
+                    else:
+                        if temp[j][0]<temp[j+1][0]:
+                            Temptuple=temp[j+1]
+                            self.__ContactsList[j+1]=self.__ContactsList[j]
+                            self.__ContactsList[j+1]=Temptuple
+                size2-=1
+        
+
+
+            
+            
+            
+                

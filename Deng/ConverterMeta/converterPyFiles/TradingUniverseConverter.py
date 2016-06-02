@@ -65,7 +65,7 @@ class TradingUniverseConverter(object):
                         is_error=True
                 else:
                     data_json[member] = getattr(TradingUniverseMeta, member)
-            data_json["TradingUniverse"] = reference_arg_manager("$GetTradingUniverse(None)")
+            data_json["TradingUniverse"] = reference_arg_manager("$GetTradingUniverse({0})".format(None))
             if not is_error:
                 signal_object = SignalObject()
                 signal_object.name = TradingUniverseMeta.Name

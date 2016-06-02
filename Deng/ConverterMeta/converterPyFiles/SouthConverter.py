@@ -10,14 +10,16 @@ class SouthMeta(OrderedObject):
         self.Name = ""
         self.Type = "South"
         self.South = ""
+        self.South1 = ""
         self.BalanceDateSignal = ""
         self.BalanceDate = ""
         self.NeedSigalDataFromAthene = ""
         self.Mode = "Autonomy"
 
     def get_const_member_list(self):
-        member_list = ['Name','Type','South','BalanceDateSignal',
-            'BalanceDate','NeedSigalDataFromAthene','Mode']
+        member_list = ['Name','Type','South','South1',
+            'BalanceDateSignal','BalanceDate','NeedSigalDataFromAthene',
+            'Mode']
         return member_list
 
     def get_signal_list(self):
@@ -25,7 +27,7 @@ class SouthMeta(OrderedObject):
         return signal_list
 
     def required_member_list(self):
-        required_list=['Name', 'Type', 'South', 'BalanceDateSignal', 'BalanceDate', 'NeedSigalDataFromAthene']
+        required_list=['Name', 'Type', 'South', 'South1', 'BalanceDateSignal', 'BalanceDate', 'NeedSigalDataFromAthene']
         return required_list
 
     def optional_member_list(self):
@@ -69,3 +71,22 @@ class SouthConverter(object):
             param = param[1].split(',')
             param[0] = param[0][1:]
             param[-1] = param[-1][:-1]
+            data_json["South"] = reference_arg_manager("$GetSouth({0},{1})".format(SouthMeta.BalanceDate,param[-1]))
+            param = data_json["South1"].strip().split('$')
+            param = param[1].split(',')
+            param[0] = param[0][1:]
+            param[-1] = param[-1][:-1]
+            data_json["South1"] = reference_arg_manager("$GetSouth({0},{1})".format(SouthMeta.BalanceDate,param[-1]))
+            if not is_error:
+                signal_object = SignalObject()
+                signal_object.name = SouthMeta.Name
+                signal_object.type = SouthMeta.Type
+                signal_object.enable = True
+                signal_object.node = json.dumps(data_json)
+                self.__signal_object_list.append(signal_object)
+        except Exception as e:
+            raise CSVConverterError(SouthMeta.Name, SouthMeta.Type, e.message)
+
+    def get_signal_id(self, signal_id):
+        signal_id_list = [signal_id]
+        return signal_id_list

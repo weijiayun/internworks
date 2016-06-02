@@ -299,60 +299,39 @@ def GenerateSignalPythonScript(SignalList,desPath,csvpath,excludelist):
         for key,value in signalfuncdict.items():
             param1 = ""
             param2=""
-            param3=""
             a=len(value[2])-len(value[1])
             for i in range(len(value[2])):
                 if i != len(value[2])-1:
-                    param3 += '{},'.format(i)
+                    param1 += '{%s},'%i
                 else:
-                    param3 += '{}'.format(i)
+                    param1 += '{%s}'%i
             for i, its in enumerate(value[1]):
-                if i == len(value[1]) - 1:
-                    if its == 'None' or its == 'none':
-                        param1 += its
+                if its != 'None' and its != 'none':
+                    if i == len(value[1]) - 1:
+                        param2 += "{}Meta.".format(name) + its
                     else:
-                        param1 += "{}Meta.".format(name) + its
+                        param2 += "{}Meta.".format(name) + its + ','
                 else:
-                    if its == 'None' or its == 'none':
-                        param1 += its + ','
-                    else:
-                        param1 += "{}Meta.".format(name) + its + ','
-            if a !=0:
-                for i,its in enumerate(value[1]):
-                    if i == len(value[1])-1:
-                        param1 += "{}Meta.".format(name)+its
-                    else:
-                        param1 += "{}Meta.".format(name)+its+','
+                    param2 = 'None'
+            if a != 0:
+                param3 = ""
                 f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = data_json["{}"].strip().split('$')'''.format(key))
                 f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = param[1].split(',')''')
                 f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[0] = param[0][1:]''')
                 f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[-1] = param[-1][:-1]''')
-
-                for i in range(-a,0,1):
-                    if i == -a:
-                        if i != -1:
-                            param2 += 'param[{}],'.format(i)
+                if len(value[2]) != 0:
+                    for i in range(-a,0,1):
+                        if len(value[1]) == 0:
+                            if i == -1:
+                                param3 += "param[{}]".format(i)
+                            else:
+                                param3 += "param[{}],".format(i)
                         else:
-                            str1 = ""
-                            for i in range(-a, 0, 1):
-                                if i != -1:
-                                    str1 += 'param[{}]'.format(i) + ','
-                                else:
-                                    str1 += 'param[{}]'.format(i)
-                            param2 +=str
-                    else:
-                        if i == -1:
-                            str1=""
-                            for i in range(-a,0,1):
-                                if i != -1:
-                                    str1 += 'param[{}]'.format(i) + ','
-                                else:
-                                    str1 += 'param[{}]'.format(i)
-                            param2 +=str1
-                param2=param1+param2
-                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})"'.format(value[0],param3) + '.format({})'.format(param2))
+                            param3 += ",param[{}]".format(i)
+                    f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})"'.format(value[0],param1) + '.format({}{}))'.format(param2,param3))
             else:
-                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})")'.format(value[0],param1))
+                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})"'.format(value[0], param1) + '.format({}))'.format(param2))
+
 
 
     f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040if not is_error:')
@@ -506,9 +485,7 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
     f2.write("\n\n\040\040\040\040def get_portfolio_list(self):")
     f2.write("\n\040\040\040\040\040\040\040\040portfolio_list = ['Portfolio']")
     f2.write("\n\040\040\040\040\040\040\040\040return portfolio_list")
-    f2.write("\n\n\040\040\040\040def get_bool_list(self):")
-    f2.write('''\n\040\040\040\040\040\040\040\040bool_list = {}'''.format(boolList))
-    f2.write("\n\040\040\040\040\040\040\040\040return bool_list")
+
     f2.write("\n\n\040\040\040\040def get_MatchStrategyId(self):")
     f2.write("\n\040\040\040\040\040\040\040\040ID_list = ['MatchStrategyId']")
     f2.write("\n\040\040\040\040\040\040\040\040return ID_list\n")
@@ -542,58 +519,47 @@ def GenerateStrategyPythonScript(StrategyList, desPath,csvpath,excludelist=None)
     f2.write("\n\040\040\040\040\040\040\040\040\040\040\040\040data_json['Ranges'] = generate_ranges({0}Meta, {0}Meta.member_list)".format(name))
 
     if len(signalfuncdict) != 0:
-        for key,value in signalfuncdict.items():
+        for key, value in signalfuncdict.items():
             param1 = ""
-            param2=""
-            a=len(value[2])-len(value[1])
-            for i, its in enumerate(value[1]):
-                if i == len(value[1]) - 1:
-                    if its == 'None' or its == 'none':
-                        param1 += its
-                    else:
-                        param1 += "{}Meta.".format(name) + its
+            param2 = ""
+            a = len(value[2]) - len(value[1])
+            for i in range(len(value[2])):
+                if i != len(value[2]) - 1:
+                    param1 += '{%s},' % i
                 else:
-                    if its == 'None' or its == 'none':
-                        param1 += its + ','
+                    param1 += '{%s}' % i
+            for i, its in enumerate(value[1]):
+                if its != 'None' and its != 'none':
+                    if i == len(value[1]) - 1:
+                        param2 += "{}Meta.".format(name) + its
                     else:
-                        param1 += "{}Meta.".format(name) + its + ','
-            if a !=0:
-                for i,its in enumerate(value[1]):
-                    if i == len(value[1])-1:
-                        param1 += "{}Meta.".format(name)+its
-                    else:
-                        param1 += "{}Meta.".format(name)+its+','
-                f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = data_json["{}"].strip().split('$')'''.format(key))
+                        param2 += "{}Meta.".format(name) + its + ','
+                else:
+                    param2 = 'None'
+            if a != 0:
+                param3 = ""
+                f2.write(
+                    '''\n\040\040\040\040\040\040\040\040\040\040\040\040param = data_json["{}"].strip().split('$')'''.format(
+                        key))
                 f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param = param[1].split(',')''')
                 f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[0] = param[0][1:]''')
                 f2.write('''\n\040\040\040\040\040\040\040\040\040\040\040\040param[-1] = param[-1][:-1]''')
-
-                for i in range(-a,0,1):
-                    if i == -a:
-                        if i != -1:
-                            param2 += ',{},'
+                if len(value[2]) != 0:
+                    for i in range(-a, 0, 1):
+                        if len(value[1]) == 0:
+                            if i == -1:
+                                param3 += "param[{}]".format(i)
+                            else:
+                                param3 += "param[{}],".format(i)
                         else:
-                            str1 = ""
-                            for i in range(-a, 0, 1):
-                                if i != -1:
-                                    str1 += 'param[{}]'.format(i) + ','
-                                else:
-                                    str1 += 'param[{}]'.format(i)
-                            param2 += ',{})"' + '.format({})'.format(str1)
-                    else:
-                        if i == -1:
-                            str1=""
-                            for i in range(-a,0,1):
-                                if i != -1:
-                                    str1 += 'param[{}]'.format(i) + ','
-                                else:
-                                    str1 += 'param[{}]'.format(i)
-                            param2 += '{})"'+'.format({})'.format(str1)
-                        else:
-                            param2 += '{},'
-                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({}'.format(value[0],param1) + '{})'.format(param2))
+                            param3 += ",param[{}]".format(i)
+                    f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(
+                        key) + ' = reference_arg_manager("${}({})"'.format(value[0], param1) + '.format({}{}))'.format(
+                        param2, param3))
             else:
-                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(key) + ' = reference_arg_manager("${}({})")'.format(value[0],param1))
+                f2.write('\n\040\040\040\040\040\040\040\040\040\040\040\040data_json["{}"]'.format(
+                    key) + ' = reference_arg_manager("${}({})"'.format(value[0], param1) + '.format({}))'.format(
+                    param2))
 
 
     f2.write("\n\040\040\040\040\040\040\040\040except Exception as e:")
@@ -670,6 +636,7 @@ if __name__=='__main__':
         GeneratePythonScripts(filePath,PythonPath,csvPath,strategyMethod)
     except Exception,e:
         print e.message
+
 
 
 
